@@ -1,0 +1,114 @@
+h1. smd_imagery
+
+Insert images into your Write panel. Very handy for people who run photoblog or image-heavy sites, or those who categorise images for inclusion in articles.
+
+h2. Features
+
+* Replace category names with image id values in the Article Image field.
+* Comma-separate category names to grab id values from them all at once.
+* Order of image id values is preserved.
+* Craft custom image sets based on an image category, or load images from an article field.
+* Build a list of id values or a complete tag to paste into your article via a template.
+* Fast and efficient: only one query.
+
+h2. Installation / Uninstallation
+
+p(information). Requires Textpattern 4.5+
+
+p(information). Recommended: Textpattern 4.6+
+
+"Download the plugin":https://github.com/Bloke/smd_imagery/releases, paste the code into the Textpattern _Admin->Plugins_ panel, install and enable the plugin. For bug reports, please "raise an issue":https://github.com/Bloke/smd_imagery/issues.
+
+To uninstall, delete the plugin from the _Admin->Plugins_ panel.
+
+h2. Usage
+
+Once installed, two new buttons labelled _Fetch_ and _Manage_ appear below the Article Image field. Both of these allow you to insert images into your article, but they do it in different ways, as detailed below.
+
+h3. Populating Article Image by category
+
+Use the _Fetch_ button to immediately ask the database to grab the image id values from any category names listed in the _Article Image_ field. If you are using Textpattern v4.6.0 or later, just save or publish the article: the image id values will be fetched for you automatically and populated in the _Article Image_ box.
+
+Notes:
+
+* The order of id values already present in the Article Image field is perserved after replacement.
+* Any categories that do not exist (or typos) will remain in the list.
+* Any category names that are wholly numeric will _not_ be fetched, as the plugin cannot distinguish between them and id values.
+* The maximum number of characters -- incuding commas and spaces -- that can be stored in the Article Image field is 255 by default. This is why the plugin doesn't put spaces between its id values. If you insert a category name that results in the image id list exceeding this number of characters, the article will throw an error when saving.
+
+h3. Examples
+
+h4. Example 1
+
+* Create an image category called @holiday_snaps@.
+* Upload some images and assign them to that category.
+* On the Write panel, type @holiday_snaps@ into the Article Image field.
+* Hit _Fetch_.
+* Note that @holiday_snaps@ has been replaced with a list of image id values that were assoaciated with that category.
+
+h4. Example 2
+
+* Create a few image categories.
+* Upload some images to each.
+* On the Write panel, list the image category names in the Article Image field.
+* Hit _Fetch_ and note the content of the Article Image field has been populated with the id values from each of the categories.
+
+h4. Example 3
+
+Do something similar to Example 2, but before httng the _Fetch_ button, sprinkle some other image id values in the Article Image field. For example:
+
+bc. 15, 42, holiday_snaps, 6, night-out, 129
+
+After hitting _Fetch_, note that the id values pulled from the database are replaced in-situ. Also note that if one or more of the id values you've typed are the same as any in the categories you're fetching, the duplicates will not be fetched. Further, if all of the id values that comprise a category are already in the Article Image field, that category name will remain in the list.
+
+h3. Crafting image lists by hand
+
+For more control over your image lists, and where you can insert the resulting values, use the _Manage_ button. This will pop up a dialog box that contains a radio button to allow you to choose between two methods of fetching images:
+
+* By category: to load images by the chosen category, at the chosen size, ordered by the chosen property in the desired order depicted by the arrow.
+* From field: to load images from the selected article field, in the order defined in that field.
+
+In the latter case, the plugin searches for images in the following order:
+
+# A straight list of id values.
+# @<txp:images id="x, y, z, ...">@.
+# @<txp:images name="file1.jpg, file2.png, file3.jpg, ...">@.
+# @<txp:image id="x" />@ @<txp:image id="y" />@ @<txp:image id="z" />@ ...
+# @<img src="http://example.org/images/x.jpg" />@ @<img src="http://example.org/images/y.png" />@ @<img src="http://example.org/images/z.jpg" />@ ...
+
+Notes:
+
+* Selecting the empty entry at the top of the category list will fetch all uncategorized images.
+* If you have the smd_thumbnail plugin installed, any active profiles you have defined are also available in the 'size' dropdown.
+* If you choose 'Image' as the size, it will fetch every full-size image in the chosen category. This may take some time if the number of images is large!
+
+Once you have selected your image category/field and properties, hit the nearby _Fetch_ button. All images that match the criteria of that size will be loaded in the dialog window for your consideration. You may drag and drop the images to reorder them to taste, or hit the 'x' button to remove an image from the list. It *will not* delete the real image on disk, just remove it from the list in the dialog box.
+
+As you alter the images in the dialog box, the _Result_ textarea box at the bottom of the dialog is updated in real-time to reflect the list of id values that represent your chosen image set. At any time you can copy that list and paste it into the Article Image field, a custom field, the body, etc in order to build your gallery.
+
+You may also use the _Template_ box to specify a template into which the list will be inserted. The entire set will then be available in the _Result_ box. This is primarily designed for creating tags such as @<txp:images>@ from your lists. For example, you could define your tag template as:
+
+bc. <txp:images id="{smd_imagery_list_id}" form="gallery" />
+
+Whichever images you choose in the list, their id values will be inserted in place of the @{smd_imagery_list_id}@, in real-time. If you prefer image names, you may elect to define your tag something like this:
+
+bc. <txp:images name="{smd_imagery_list_name}" form="gallery"
+   wraptag="div" class="photos" />
+
+There are also a pair of specialised replacement tags to return quoted lists of ids or names: @{smd_imagery_list_id_quoted}@ or @{smd_imagery_list_name_quoted}@.
+
+If you wish to insert each image individually, you might like one of these templates:
+
+bc. <txp:image id="{smd_imagery_id}" />
+
+or
+
+bc. <txp:image name="{smd_imagery_name}" />
+
+You can copy and paste the complete tag(s) from the _Result_ box and paste it into your article somewhere, or use it as a sneaky tag builder for galleries. Your template could even include an smd_macro! If using the core tags, your @gallery@ Form can, of course, be used to render anything you like using the @<txp:image>@, @<txp:image_info>@ and @<txp:image_url>@ et al tags.
+
+Notes:
+
+* Your chosen image size, field, template tag and sort options are automatically remembered and recalled each time you open the dialog box so you can rapidly build galleries on photo-heavy sites.
+* When using the @<txp:images>@ tag to construct galleries using its @name@ attribute, the resulting gallery _will not contain images in the order you specify_. Only its @id@ attrbute will return them in the defined order.
+* The dialog box is dog ugly under Txp 4.5.x because jQuery UI is not included, nor styled to match the admin theme. Using the plugin under Txp 4.6+ offers a much cleaner experience.
